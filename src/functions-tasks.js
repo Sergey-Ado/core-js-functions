@@ -142,8 +142,18 @@ function memoize(func) {
  * }, 2);
  * retryer() => 2
  */
-function retry(/* func, attempts */) {
-  throw new Error('Not implemented');
+function retry(func, attempts) {
+  let count = 0;
+  let result;
+  return function F() {
+    try {
+      result = func();
+    } catch {
+      count += 1;
+      if (count < attempts) F();
+    }
+    return result;
+  };
 }
 
 /**
@@ -169,8 +179,14 @@ function retry(/* func, attempts */) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
+function logger(func, logFunc) {
+  return function F(...args) {
+    const str = `${func.name}(${args.map((s) => JSON.stringify(s)).join(',')})`;
+    logFunc(`${str} starts`);
+    const result = func(...args);
+    logFunc(`${str} ends`);
+    return result;
+  };
 }
 
 /**
@@ -186,8 +202,10 @@ function logger(/* func, logFunc */) {
  *   partialUsingArguments(fn, 'a','b','c')('d') => 'abcd'
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
-function partialUsingArguments(/* fn, ...args1 */) {
-  throw new Error('Not implemented');
+function partialUsingArguments(fn, ...args1) {
+  return function F(...arg2) {
+    return fn(...args1, ...arg2);
+  };
 }
 
 /**
